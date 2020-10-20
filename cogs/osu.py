@@ -22,7 +22,6 @@ class Osu(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @staticmethod
     async def use_api(self, ctx, url):
         async with aiohttp.ClientSession() as session:
             try:
@@ -33,7 +32,6 @@ class Osu(commands.Cog):
                 await ctx.send('Invalid URL parse :wheelchair:')
                 return
 
-    @staticmethod
     async def parse_match(self, ctx, games):
         plist = {}
         for game in games:
@@ -90,7 +88,6 @@ class Osu(commands.Cog):
 
         return text_string
 
-    @staticmethod
     async def get_username(self, ctx, player_id):
         async with aiohttp.ClientSession() as session:
             try:
@@ -112,6 +109,7 @@ class Osu(commands.Cog):
                 await ctx.send('Invalid URL :wheelchair:')
                 return
             url = url[1]
+            print('fgdsgdsg' + url)
             res = await self.use_api(ctx, "https://osu.ppy.sh/api/get_match?k=" + osu_api_key + "&mp=" + url)
             message = await self.parse_match(ctx, res['games'])
             await ctx.send(message)
