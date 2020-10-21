@@ -21,15 +21,8 @@ except IOError as e:
     print('Exception while trying to open json: ' + e.__str__())
 
 token = data_props['token']
-
-'''def get_prefix(bot, message):
-    prefixes = ['.', '@']
-    if not message.guild:
-        return '?'
-    return commands.when_mentioned_or(*prefixes)(bot, message)'''
-
 initial_extensions = ['cogs.among', 'cogs.osu']
-bot = commands.Bot(command_prefix=['.','@'])
+bot = commands.Bot(command_prefix=['.', '@'])
 
 if __name__ == '__main__':
     for extension in initial_extensions:
@@ -42,4 +35,18 @@ async def on_ready():
     print(f'Successfully logged in and booted...!')
 
 
-bot.run(token) #, bot=True, reconnect=True)
+@bot.command()
+async def clear(ctx, limit: int = None):
+    if ctx.message.author.guild_permissions.administrator:
+        passed = 0
+        failed = 0
+        async for msg in ctx.message.channel.history(limit=limit):
+            try:
+                await msg.delete()
+                passed += 1
+            except:
+                failed += 1
+        await ctx.send(f"[Complete] Removed {passed} messages with {failed} fails")
+
+
+bot.run(token)  # , bot=True, reconnect=True)

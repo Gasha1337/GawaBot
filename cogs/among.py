@@ -8,6 +8,8 @@ from discord import ChannelType
 list_of_lobbies = []
 mutedList = []
 cooldown_list = []
+comma = "'"
+cooldown_time = 1200
 
 
 class Among(commands.Cog):
@@ -127,7 +129,7 @@ class Among(commands.Cog):
             self.get_all_users_in_lobby(ctx, channel.id)
             self.check_timers()
             self.check_users()
-            if self.check_if_lobby_on_cooldown(channel.id) & self.check_if_user_is_not_on_cooldown(ctx, channel.id):
+            if (self.check_if_lobby_on_cooldown(channel.id) and self.check_if_user_is_not_on_cooldown(ctx, channel.id)) is True:
                 if ctx.prefix.__str__() == '@':
                     try:
                         i = 0
@@ -141,6 +143,7 @@ class Among(commands.Cog):
                         print('@here called from  ' + channel.id.__str__())
                         self.set_timer_on_lobby(channel.id)
                         self.set_timer_on_users_in_lobby(ctx)
+                        self.clear_cooldown_list()
                     except Exception as e:
                         print('Exception in @here command ' + e.__str__())
                         await ctx.send('Something went wrong')
@@ -166,8 +169,6 @@ class Among(commands.Cog):
         for c in channels:
             i += 1
             print('added vc #' + i.__str__() + ' ' + c.__str__())
-            # t = Timer(10, function=self.reset_timer)
-            # t.start()
             list_of_lobbies.append((c.__str__(), 0))  # time.perf_counter()))
 
     def check_timers(self):
@@ -177,38 +178,33 @@ class Among(commands.Cog):
             print('123 ' + x.__str__())
             if 'stopped' in x.__str__():
                 print('found stopped timer, reseting timer')
-                list_of_lobbies[i] = (x.__str__()[2:20], 0)
+                list_of_lobbies[i] = (x.__str__().split(comma)[1], 0)
             i += 1
-
-    def timer_ended(self):
-        pass
 
     def set_timer_on_lobby(self, lobby_id):
         i = 0
         for x in list_of_lobbies:
-            if x.__str__()[2:-5] == lobby_id.__str__():
-                t = Timer(1200, function=self.timer_ended)
+            if x.__str__().split(comma)[1] == lobby_id.__str__():
+                t = Timer(cooldown_time, function=self.timer_ended)
                 t.start()
-                list_of_lobbies[i] = (x.__str__()[2:-5], t)
+                list_of_lobbies[i] = (x.__str__().split(comma)[1], t)
                 # x = (x.__str__()[2:-5], t)
                 print('lobby  ' + lobby_id.__str__() + ' set on 30 min cooldown ')
             i += 1
 
     def get_all_users_in_lobby(self, ctx, lobby_id):
-        comma = "'"
         leader = ctx.author
         channel = self.bot.get_channel(leader.voice.channel.id)
         for member in list(channel.members):
-            if (member.id.__str__() not in cooldown_list.__str__() ):
+            if member.id.__str__() not in cooldown_list.__str__():
                 cooldown_list.append((member.id.__str__(), 0))
 
     def check_if_user_is_not_on_cooldown(self, ctx, lobby_id):
-        comma = "'"
         leader = ctx.author
         channel = self.bot.get_channel(leader.voice.channel.id)
         print('user on cooldown')
         for member in list(channel.members):
-            i = 0;
+            i = 0
             for x in cooldown_list:
                 if member.id.__str__() == cooldown_list[i].__str__().split(comma)[1]:
                     if 'started' in cooldown_list[i].__str__():
@@ -222,11 +218,10 @@ class Among(commands.Cog):
         for x in cooldown_list:
             if 'stopped' in x.__str__():
                 print('found stopped timer on user, reseting timer')
-                cooldown_list[i] = (x.__str__()[2:20], 0)
+                cooldown_list[i] = (x.__str__().split(comma)[1], 0)
             i += 1
 
     def set_timer_on_users_in_lobby(self, ctx):
-        comma = "'"
         leader = ctx.author
         channel = self.bot.get_channel(leader.voice.channel.id)
         i = 0
@@ -234,12 +229,16 @@ class Among(commands.Cog):
         for x in cooldown_list:
             print('12312312313')
             if x.__str__().split(comma)[1] in list(channel.members).__str__():
-                t = Timer(1200, function=self.timer_ended)
+                t = Timer(cooldown_time, function=self.timer_ended)
                 t.start()
                 cooldown_list[i] = (x.__str__().split(comma)[1], t)
             i += 1
 
-
+    def clear_cooldown_list(self):
+        if ', 0' in cooldown_list:
+            cooldown_list.remove(', 0')
+        elif 'stopped' in cooldown_list:
+            cooldown_list.remove('stopped')
 
     @commands.command(pass_context=True)
     async def dd(self, ctx):
@@ -249,6 +248,9 @@ class Among(commands.Cog):
         await ctx.send('list of users')
         for x in cooldown_list:
             await ctx.send(x)
+
+    def timer_ended(self):
+        pass
 
 
 def setup(bot):
