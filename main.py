@@ -35,7 +35,7 @@ async def on_ready():
     print(f'Successfully logged in and booted...!')
 
 
-@bot.command()
+@bot.command(brief='Clears N messages in text channel.')
 async def clear(ctx, limit: int = None):
     if ctx.message.author.guild_permissions.administrator:
         passed = 0
@@ -47,6 +47,5 @@ async def clear(ctx, limit: int = None):
             except:
                 failed += 1
         await ctx.send(f"[Complete] Removed {passed} messages with {failed} fails")
-
 
 bot.run(token)  # , bot=True, reconnect=True)

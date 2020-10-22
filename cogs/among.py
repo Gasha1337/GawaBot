@@ -16,53 +16,57 @@ class Among(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, brief="Mutes everyone in voice chat you're in. Only for admins")
     async def mv(self, ctx):
-        print('.mv requested by ' + ctx.author.name.__str__())
-        leader = ctx.author
-        start = time.time()
-        try:
-            channel = self.bot.get_channel(leader.voice.channel.id)
-            for member in list(channel.members):
-                await member.edit(deafen=True, mute=True)
-                mutedList.append(member)
-            end = time.time()
-            endedTime = round((end - start), 2)
-            await ctx.send('muted everyone in voice channel ' + channel.name + ' in ' + endedTime.__str__() + 's.')
-        except AttributeError:
-            print("exception in .mv")
+        if ctx.message.author.guild_permissions.administrator:
+            print('.mv requested by ' + ctx.author.name.__str__())
+            leader = ctx.author
+            start = time.time()
+            try:
+                channel = self.bot.get_channel(leader.voice.channel.id)
+                for member in list(channel.members):
+                    await member.edit(deafen=True, mute=True)
+                    if member not in mutedList:
+                        mutedList.append(member)
+                end = time.time()
+                endedTime = round((end - start), 2)
+                await ctx.send('muted everyone in voice channel ' + channel.name + ' in ' + endedTime.__str__() + 's.')
+            except AttributeError:
+                print("exception in .mv")
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, brief="Unmutes everyone in voice chat you're in. Only for admins")
     async def uv(self, ctx):
-        print('.uv requested by ' + ctx.author.name.__str__())
-        leader = ctx.author
-        start = time.time()
-        end = None
-        try:
-            channel = self.bot.get_channel(leader.voice.channel.id)
-            for member in list(channel.members):
-                await member.edit(deafen=False, mute=False)
-            end = time.time()
-            endedTime = round((end - start), 2)
-            await ctx.send('unmuted everyone in voice channel ' + channel.name + ' in ' + endedTime.__str__() + 's.')
-        except AttributeError:
-            print("exception in .uv")
-        print(end - start)
+        if ctx.message.author.guild_permissions.administrator:
+            print('.uv requested by ' + ctx.author.name.__str__())
+            leader = ctx.author
+            start = time.time()
+            end = None
+            try:
+                channel = self.bot.get_channel(leader.voice.channel.id)
+                for member in list(channel.members):
+                    await member.edit(deafen=False, mute=False)
+                end = time.time()
+                endedTime = round((end - start), 2)
+                await ctx.send('unmuted everyone in voice channel ' + channel.name + ' in ' + endedTime.__str__() + 's.')
+            except AttributeError:
+                print("exception in .uv")
+            print(end - start)
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, brief="Unmutes everyone who were muted by .mv before. Only for admins")
     async def uvall(self, ctx):
-        print('.uvall requested by ' + ctx.author.name.__str__())
-        start = time.time()
-        end = None
-        try:
-            for member in list(mutedList):
-                await member.edit(deafen=False, mute=False)
-            end = time.time()
-            ended_time = round((end - start), 2)
-            await ctx.send('unmuted everyone who were muted before for ' + ended_time.__str__() + 's.')
-        except AttributeError:
-            print("exception in .uvall")
-        print(end - start)
+        if ctx.message.author.guild_permissions.administrator:
+            print('.uvall requested by ' + ctx.author.name.__str__())
+            start = time.time()
+            end = None
+            try:
+                for member in list(mutedList):
+                    await member.edit(deafen=False, mute=False)
+                end = time.time()
+                ended_time = round((end - start), 2)
+                await ctx.send('unmuted everyone who were muted before for ' + ended_time.__str__() + 's.')
+            except AttributeError:
+                print("exception in .uvall")
+            print(end - start)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -120,7 +124,7 @@ class Among(commands.Cog):
         except Exception:
             print('exception in on_raw_rection_remove')
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, brief="Working @here with cooldown to gather players")
     async def here(self, ctx):
         if not list_of_lobbies:
             self.fill_list_of_lobbies(ctx)
@@ -240,14 +244,15 @@ class Among(commands.Cog):
         elif 'stopped' in cooldown_list:
             cooldown_list.remove('stopped')
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, brief="Secret command. Only for admins")
     async def dd(self, ctx):
-        await ctx.send('list of lobbies')
-        for x in list_of_lobbies:
-            await ctx.send(x)
-        await ctx.send('list of users')
-        for x in cooldown_list:
-            await ctx.send(x)
+        if ctx.message.author.guild_permissions.administrator:
+            await ctx.send('list of lobbies')
+            for x in list_of_lobbies:
+                await ctx.send(x)
+            await ctx.send('list of users')
+            for x in cooldown_list:
+                await ctx.send(x)
 
     def timer_ended(self):
         pass

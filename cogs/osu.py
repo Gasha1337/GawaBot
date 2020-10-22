@@ -32,7 +32,7 @@ class Osu(commands.Cog):
                 await ctx.send('Invalid URL parse :wheelchair:')
                 return
 
-    async def parse_match(self, ctx, games):
+    async def parse_match(self, ctx, games, column):
         plist = {}
         for game in games:
             try:
@@ -78,11 +78,15 @@ class Osu(commands.Cog):
             map_number = 0
             player_username = await self.get_username(ctx, player)
             text_string += (player_number.__str__() + '. ' + player_username + ': ')
+            if column:
+                text_string += '\n'
             for game in games:
                 map_number = map_number + 1
                 for score in game['scores']:
                     if player == score['user_id']:
                         text_string += score['score'] + ' '
+                        if column:
+                            text_string += '\n'
             print('player ' + player_number.__str__() + ' finished')
             text_string += '\n'
 
@@ -99,7 +103,7 @@ class Osu(commands.Cog):
                 await ctx.send('get username error')
                 return
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, brief="Parses osu! multi match and gets all scores for each player in order")
     async def ms(self, ctx, url):
         print('.ms ' + url.__str__() + ' requested by ' + ctx.author.name.__str__())
         if 'https://osu.ppy.sh/community/matches' in url:
@@ -111,7 +115,22 @@ class Osu(commands.Cog):
             url = url[1]
             print('fgdsgdsg' + url)
             res = await self.use_api(ctx, "https://osu.ppy.sh/api/get_match?k=" + osu_api_key + "&mp=" + url)
-            message = await self.parse_match(ctx, res['games'])
+            message = await self.parse_match(ctx, res['games'], False)
+            await ctx.send(message)
+
+    @commands.command(pass_context=True, brief="Same as .ms but in column")
+    async def msc(self, ctx, url):
+        print('.ms ' + url.__str__() + ' requested by ' + ctx.author.name.__str__())
+        if 'https://osu.ppy.sh/community/matches' in url:
+            try:
+                url = url.split("matches/")
+            except:
+                await ctx.send('Invalid URL :wheelchair:')
+                return
+            url = url[1]
+            print('fgdsgdsg' + url)
+            res = await self.use_api(ctx, "https://osu.ppy.sh/api/get_match?k=" + osu_api_key + "&mp=" + url)
+            message = await self.parse_match(ctx, res['games'], True)
             await ctx.send(message)
 
 
