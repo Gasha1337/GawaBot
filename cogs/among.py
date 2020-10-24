@@ -4,6 +4,7 @@ from cogs import config
 from discord import utils
 from discord.ext import commands
 from discord import ChannelType
+import random
 
 list_of_lobbies = []
 mutedList = []
@@ -253,6 +254,24 @@ class Among(commands.Cog):
             await ctx.send('list of users')
             for x in cooldown_list:
                 await ctx.send(x)
+
+    @commands.command(pass_context=True, brief="Gives random roles to people with no role")
+    async def dd2(self, ctx):
+        if ctx.message.author.guild_permissions.administrator:
+            role1 = utils.get(ctx.message.guild.roles, id=755324676720427070)
+            role2 = utils.get(ctx.message.guild.roles, id=755324708924162141)
+            for member in ctx.guild.members:
+                if len([i for i in member.roles]) == 1:
+                    r = random.randint(1, 100)
+                    if r > 50:
+                        #await ctx.send(r)
+                        await member.add_roles(role1)
+                    elif r < 50:
+                        #await ctx.send(r)
+                        await member.add_roles(role2)
+                    await ctx.send('user'+member.__str__()+' has been given random role')
+                else:
+                    await ctx.send('user '+member.__str__()+' has too many roles:   '+len([i for i in member.roles]).__str__())
 
     def timer_ended(self):
         pass
