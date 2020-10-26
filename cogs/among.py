@@ -134,7 +134,7 @@ class Among(commands.Cog):
             self.get_all_users_in_lobby(ctx, channel.id)
             self.check_timers()
             self.check_users()
-            if (self.check_if_lobby_on_cooldown(channel.id) and self.check_if_user_is_not_on_cooldown(ctx, channel.id)) is True:
+            if self.check_if_lobby_on_cooldown(channel.id) and self.check_if_user_is_not_on_cooldown(ctx, channel.id):
                 if ctx.prefix.__str__() == '@':
                     try:
                         i = 0
@@ -207,14 +207,15 @@ class Among(commands.Cog):
     def check_if_user_is_not_on_cooldown(self, ctx, lobby_id):
         leader = ctx.author
         channel = self.bot.get_channel(leader.voice.channel.id)
-        print('user on cooldown')
+        print('user on cooldown method launched')
         for member in list(channel.members):
             i = 0
             for x in cooldown_list:
                 if member.id.__str__() == cooldown_list[i].__str__().split(comma)[1]:
                     if 'started' in cooldown_list[i].__str__():
+                        print('user '+member.__str__()+' is on cooldown. Returning False')
                         return False
-                i += 0
+                i += 1
         return True
 
     def check_users(self):
